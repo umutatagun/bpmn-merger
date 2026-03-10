@@ -3,13 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BPMN Visual Merge Tool</title>
-    <meta name="description" content="Visual diff and merge tool for Camunda BPMN files. Compare two BPMN diagrams side-by-side, see semantic changes highlighted, and export a merged result." />
+
+    <!-- Primary -->
+    <title>BPMN Visual Merge Tool — Side-by-Side Diff & Merge for Camunda BPMN</title>
+    <meta name="description" content="Free online tool to visually compare and merge Camunda BPMN process diagrams. Upload two .bpmn files, review changes side-by-side with highlighted diffs, cherry-pick individual modifications, and export a clean merged BPMN." />
+    <meta name="keywords" content="BPMN, merge, diff, compare, Camunda, process diagram, visual merge, BPMN tool, workflow, BPM, BPMN 2.0, XML merge" />
+    <meta name="author" content="Umut Atagun" />
+    <link rel="canonical" href="https://bpmn-merger.vercel.app/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bpmn-merger.vercel.app/" />
     <meta property="og:title" content="BPMN Visual Merge Tool" />
-    <meta property="og:description" content="Side-by-side visual diff & merge for Camunda BPMN files" />
+    <meta property="og:description" content="Side-by-side visual diff & merge for Camunda BPMN files. Cherry-pick changes at attribute level and export a merged result." />
+    <meta property="og:image" content="https://bpmn-merger.vercel.app/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="BPMN Visual Merge" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BPMN Visual Merge Tool" />
+    <meta name="twitter:description" content="Side-by-side visual diff & merge for Camunda BPMN files." />
+    <meta name="twitter:image" content="https://bpmn-merger.vercel.app/og-image.svg" />
+
+    <!-- Misc -->
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0b0f19" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⇄</text></svg>" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "BPMN Visual Merge Tool",
+      "url": "https://bpmn-merger.vercel.app/",
+      "description": "Free online tool to visually compare and merge Camunda BPMN process diagrams side-by-side.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Umut Atagun",
+        "url": "https://www.linkedin.com/in/umutatagun"
+      },
+      "featureList": [
+        "Side-by-side BPMN diagram comparison",
+        "Semantic diff highlighting (added, modified, removed)",
+        "Attribute-level cherry-pick for modified elements",
+        "Merged BPMN export",
+        "Shift+click multi-select",
+        "Drag & drop file upload"
+      ]
+    }
+    </script>
   </head>
   <body>
+    <!-- Noscript fallback for crawlers that don't execute JS -->
+    <noscript>
+      <h1>BPMN Visual Merge Tool</h1>
+      <p>A free online tool to visually compare and merge Camunda BPMN process diagrams. Upload two .bpmn files, review changes side-by-side, cherry-pick individual modifications at attribute level, and export a clean merged BPMN 2.0 XML.</p>
+      <p>Features: side-by-side diagram comparison, semantic diff highlighting, attribute-level cherry-pick, merged BPMN export, shift+click multi-select, drag &amp; drop upload.</p>
+      <p>Built by <a href="https://www.linkedin.com/in/umutatagun">Umut Atagun</a>.</p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

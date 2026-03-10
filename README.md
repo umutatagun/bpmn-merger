@@ -1,73 +1,66 @@
-# React + TypeScript + Vite
+# BPMN Visual Merge Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A free, browser-based tool for visually comparing and merging Camunda BPMN process diagrams. Upload two `.bpmn` files, review changes side-by-side with highlighted diffs, cherry-pick modifications at the attribute level, and export a clean merged BPMN.
 
-Currently, two official plugins are available:
+**Live demo:** [bpmn-merger.vercel.app](https://bpmn-merger.vercel.app/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **Side-by-side diagram comparison** — BASE and NEW panels rendered with [bpmn-js](https://github.com/bpmn-io/bpmn-js)
+- **Semantic diff highlighting** — added (green), modified (amber), removed (red) elements
+- **Attribute-level cherry-pick** — expand a modified element to toggle individual attribute or child-element changes
+- **Shift+Click multi-select** — select a range of changes at once, similar to Camunda Modeler
+- **Merged BPMN export** — download the result as a valid `.bpmn` file
+- **Drag & drop upload** — drop files directly onto the panels
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+React · TypeScript · Tailwind CSS v4 · Vite · bpmn-js
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# install dependencies
+npm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# start dev server
+npm run dev
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# production build
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## How It Works
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Upload** a BASE and a NEW `.bpmn` file (drag & drop or click to browse).
+2. **Compare** — the tool parses both XMLs, computes a semantic diff, and highlights differences on both diagrams.
+3. **Select** — use the sidebar to pick which changes to include. Expand modified elements to cherry-pick at attribute level.
+4. **Export** — download the merged BPMN with only the selected changes applied.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project Structure
+
 ```
+src/
+├── lib/
+│   ├── parser.ts    # BPMN XML parsing & semantic diff
+│   ├── merger.ts    # Multi-pass merge engine
+│   └── types.ts     # Shared type definitions
+├── components/
+│   ├── BpmnViewer.tsx   # bpmn-js diagram renderer
+│   ├── DropZone.tsx     # File upload drop zone
+│   ├── Sidebar.tsx      # Change list with sub-change expansion
+│   └── StatusBar.tsx    # Summary status bar
+└── App.tsx              # Main layout & state management
+```
+
+## Deployment
+
+Configured for Vercel out of the box — push to your repo and import in Vercel. See `vercel.json` for settings.
+
+## License
+
+MIT
+
+## Author
+
+[Umut Atagun](https://www.linkedin.com/in/umutatagun)
