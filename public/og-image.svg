@@ -1,0 +1,104 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0b0f19"/>
+      <stop offset="100%" style="stop-color:#111827"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#14b8a6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1" transform="translate(60,0)" />
+    <line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1" transform="translate(120,0)" />
+    <line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1" transform="translate(180,0)" />
+    <line x1="0" y1="0" x2="0" y2="630" stroke="white" stroke-width="1" transform="translate(240,0)" />
+    <line x1="0" y1="0" x2="1200" y2="0" stroke="white" stroke-width="1" transform="translate(0,60)" />
+    <line x1="0" y1="0" x2="1200" y2="0" stroke="white" stroke-width="1" transform="translate(0,120)" />
+    <line x1="0" y1="0" x2="1200" y2="0" stroke="white" stroke-width="1" transform="translate(0,180)" />
+  </g>
+
+  <!-- Left BPMN panel mockup -->
+  <g transform="translate(80, 180)">
+    <rect x="0" y="0" width="460" height="280" rx="12" fill="#111827" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <!-- Panel header -->
+    <rect x="0" y="0" width="460" height="36" rx="12" fill="#1a2234"/>
+    <rect x="0" y="24" width="460" height="12" fill="#1a2234"/>
+    <rect x="16" y="10" width="8" height="8" rx="4" fill="#a78bfa" opacity="0.8"/>
+    <text x="32" y="19" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#a78bfa" letter-spacing="2">BASE</text>
+
+    <!-- Mock BPMN nodes -->
+    <circle cx="80" cy="140" r="16" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <rect x="130" y="120" width="90" height="40" rx="6" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <polygon points="290,120 310,140 290,160 270,140" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <rect x="340" y="120" width="90" height="40" rx="6" fill="none" stroke="#f59e0b" stroke-width="2.5" opacity="0.6"/>
+    <line x1="96" y1="140" x2="130" y2="140" stroke="#6b7280" stroke-width="1.5"/>
+    <line x1="220" y1="140" x2="270" y2="140" stroke="#6b7280" stroke-width="1.5"/>
+    <line x1="310" y1="140" x2="340" y2="140" stroke="#6b7280" stroke-width="1.5"/>
+  </g>
+
+  <!-- Right BPMN panel mockup -->
+  <g transform="translate(660, 180)">
+    <rect x="0" y="0" width="460" height="280" rx="12" fill="#111827" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <rect x="0" y="0" width="460" height="36" rx="12" fill="#1a2234"/>
+    <rect x="0" y="24" width="460" height="12" fill="#1a2234"/>
+    <rect x="16" y="10" width="8" height="8" rx="4" fill="#60a5fa" opacity="0.8"/>
+    <text x="32" y="19" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#60a5fa" letter-spacing="2">NEW</text>
+
+    <!-- Mock BPMN nodes with diff colors -->
+    <circle cx="60" cy="140" r="16" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <rect x="110" y="120" width="90" height="40" rx="6" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <polygon points="270,120 290,140 270,160 250,140" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <rect x="320" y="120" width="90" height="40" rx="6" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="2.5"/>
+    <rect x="320" y="190" width="90" height="40" rx="6" fill="rgba(34,197,94,0.2)" stroke="#22c55e" stroke-width="2.5"/>
+    <line x1="76" y1="140" x2="110" y2="140" stroke="#6b7280" stroke-width="1.5"/>
+    <line x1="200" y1="140" x2="250" y2="140" stroke="#6b7280" stroke-width="1.5"/>
+    <line x1="290" y1="140" x2="320" y2="140" stroke="#6b7280" stroke-width="1.5"/>
+    <line x1="290" y1="140" x2="290" y2="210" stroke="#22c55e" stroke-width="1.5"/>
+    <line x1="290" y1="210" x2="320" y2="210" stroke="#22c55e" stroke-width="1.5"/>
+  </g>
+
+  <!-- Merge arrow in center -->
+  <g transform="translate(570, 290)">
+    <rect x="0" y="0" width="60" height="36" rx="18" fill="url(#accent)" opacity="0.9"/>
+    <text x="30" y="23" font-family="system-ui,sans-serif" font-size="18" fill="white" text-anchor="middle">&#x21C4;</text>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="100" font-family="system-ui,-apple-system,sans-serif" font-size="48" font-weight="800" fill="white" text-anchor="middle" letter-spacing="-1">
+    BPMN Visual Merge
+  </text>
+  <text x="600" y="145" font-family="system-ui,-apple-system,sans-serif" font-size="20" fill="#9ca3af" text-anchor="middle">
+    Side-by-side diff &amp; merge for Camunda BPMN files
+  </text>
+
+  <!-- Bottom legend -->
+  <g transform="translate(380, 520)">
+    <rect x="0" y="0" width="12" height="12" rx="3" fill="rgba(34,197,94,0.3)" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="20" y="11" font-family="system-ui,sans-serif" font-size="13" fill="#9ca3af">Added</text>
+
+    <rect x="100" y="0" width="12" height="12" rx="3" fill="rgba(245,158,11,0.3)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="120" y="11" font-family="system-ui,sans-serif" font-size="13" fill="#9ca3af">Modified</text>
+
+    <rect x="220" y="0" width="12" height="12" rx="3" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2"/>
+    <text x="240" y="11" font-family="system-ui,sans-serif" font-size="13" fill="#9ca3af">Removed</text>
+
+    <rect x="340" y="-4" width="100" height="22" rx="11" fill="url(#green)" opacity="0.9"/>
+    <text x="390" y="12" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="white" text-anchor="middle">Export</text>
+  </g>
+
+  <!-- Author -->
+  <text x="600" y="590" font-family="system-ui,sans-serif" font-size="14" fill="#4b5563" text-anchor="middle">
+    by Umut Atagun
+  </text>
+</svg>
