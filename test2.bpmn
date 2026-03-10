@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0592076" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.30.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
+  <bpmn:process id="Process_1hg3h57" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1fzavgo</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_0ie00ag" name="SD Check-CI" camunda:asyncBefore="true" camunda:class="com.pia.next.bpm.delegate.GatewayServiceDelegate">
+      <bpmn:extensionElements>
+        <camunda:field name="serviceName">
+          <camunda:string>http://next-servicedesk-service:8080/servicedesk/v2/ci-check</camunda:string>
+        </camunda:field>
+        <camunda:field name="parameters">
+          <camunda:string>OrderId,OrderItemId,searchValue,searchType</camunda:string>
+        </camunda:field>
+        <camunda:field name="results">
+          <camunda:string>status, code, ciInfoCheckResult</camunda:string>
+        </camunda:field>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="searchType">resourceName</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1fzavgo</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rwulls</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_1fei8jo" attachedToRef="Activity_0ie00ag">
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0vz0nf4" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1fzavgo" sourceRef="StartEvent_1" targetRef="Activity_0ie00ag" />
+    <bpmn:serviceTask id="Activity_1lyhxzu" name="SD Check-CI" camunda:asyncBefore="true" camunda:class="com.pia.next.bpm.delegate.GatewayServiceDelegate">
+      <bpmn:extensionElements>
+        <camunda:field name="serviceName">
+          <camunda:string>test-deneme</camunda:string>
+        </camunda:field>
+        <camunda:field name="parameters">
+          <camunda:string>OrderId,OrderItemId,searchValue</camunda:string>
+        </camunda:field>
+        <camunda:field name="results">
+          <camunda:string>status, code, ciInfoCheckResult</camunda:string>
+        </camunda:field>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="searchType">resourceName</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_06tfe5i</bpmn:incoming>
+      <bpmn:outgoing>Flow_0udqy5t</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_0vxiv2c" attachedToRef="Activity_1lyhxzu">
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0dqtrfs" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="Gateway_1rgg742" default="Flow_02lzfi3">
+      <bpmn:incoming>Flow_1rwulls</bpmn:incoming>
+      <bpmn:outgoing>Flow_06tfe5i</bpmn:outgoing>
+      <bpmn:outgoing>Flow_02lzfi3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1rwulls" sourceRef="Activity_0ie00ag" targetRef="Gateway_1rgg742" />
+    <bpmn:sequenceFlow id="Flow_06tfe5i" sourceRef="Gateway_1rgg742" targetRef="Activity_1lyhxzu">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ciInfo}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_1260e8p" name="test ci" camunda:asyncBefore="true" camunda:class="com.pia.next.bpm.delegate.GatewayServiceDelegate">
+      <bpmn:extensionElements>
+        <camunda:field name="serviceName">
+          <camunda:string>http://next-servicedesk-service:8080/servicedesk/v2/ci-check</camunda:string>
+        </camunda:field>
+        <camunda:field name="parameters">
+          <camunda:string>OrderId,OrderItemId,searchValue,searchType</camunda:string>
+        </camunda:field>
+        <camunda:field name="results">
+          <camunda:string>status, code, ciInfoCheckResult</camunda:string>
+        </camunda:field>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="searchType">resourceName</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_02lzfi3</bpmn:incoming>
+      <bpmn:outgoing>Flow_15nfoum</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_0xze40c" attachedToRef="Activity_1260e8p">
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0pz17xf" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_02lzfi3" sourceRef="Gateway_1rgg742" targetRef="Activity_1260e8p" />
+    <bpmn:endEvent id="Event_05f8fby">
+      <bpmn:incoming>Flow_0udqy5t</bpmn:incoming>
+      <bpmn:incoming>Flow_1c809kd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_15nfoum" sourceRef="Activity_1260e8p" targetRef="Activity_0nwyeym" />
+    <bpmn:sequenceFlow id="Flow_0udqy5t" sourceRef="Activity_1lyhxzu" targetRef="Event_05f8fby" />
+    <bpmn:task id="Activity_0nwyeym" name="deneme2">
+      <bpmn:incoming>Flow_15nfoum</bpmn:incoming>
+      <bpmn:outgoing>Flow_1c809kd</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1c809kd" sourceRef="Activity_0nwyeym" targetRef="Event_05f8fby" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1hg3h57">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1tofmq4" bpmnElement="Activity_0ie00ag">
+        <dc:Bounds x="310" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1g9buzw" bpmnElement="Activity_1lyhxzu">
+        <dc:Bounds x="650" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1rgg742_di" bpmnElement="Gateway_1rgg742" isMarkerVisible="true">
+        <dc:Bounds x="505" y="95" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0oina0d" bpmnElement="Activity_1260e8p">
+        <dc:Bounds x="650" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05f8fby_di" bpmnElement="Event_05f8fby">
+        <dc:Bounds x="972" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0nwyeym_di" bpmnElement="Activity_0nwyeym" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="830" y="230" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_02j5bb3" bpmnElement="Event_0xze40c">
+        <dc:Bounds x="712" y="292" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0fms2uz" bpmnElement="Event_0vxiv2c">
+        <dc:Bounds x="712" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0n9o55q" bpmnElement="Event_1fei8jo">
+        <dc:Bounds x="372" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1fzavgo_di" bpmnElement="Flow_1fzavgo">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="310" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rwulls_di" bpmnElement="Flow_1rwulls">
+        <di:waypoint x="410" y="120" />
+        <di:waypoint x="505" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06tfe5i_di" bpmnElement="Flow_06tfe5i">
+        <di:waypoint x="555" y="120" />
+        <di:waypoint x="650" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02lzfi3_di" bpmnElement="Flow_02lzfi3">
+        <di:waypoint x="530" y="145" />
+        <di:waypoint x="530" y="270" />
+        <di:waypoint x="650" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15nfoum_di" bpmnElement="Flow_15nfoum">
+        <di:waypoint x="750" y="270" />
+        <di:waypoint x="830" y="270" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0udqy5t_di" bpmnElement="Flow_0udqy5t">
+        <di:waypoint x="750" y="120" />
+        <di:waypoint x="972" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1c809kd_di" bpmnElement="Flow_1c809kd">
+        <di:waypoint x="930" y="270" />
+        <di:waypoint x="990" y="270" />
+        <di:waypoint x="990" y="138" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

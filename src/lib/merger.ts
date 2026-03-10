@@ -1,11 +1,21 @@
-import type { DiffEntry, SelectionMap } from './types';
+import type { DiffEntry, SelectionMap, SubSelectionMap } from './types';
+
+const SEMANTIC_TAGS = new Set([
+  'task', 'userTask', 'serviceTask', 'sendTask', 'receiveTask', 'manualTask',
+  'businessRuleTask', 'scriptTask', 'startEvent', 'endEvent',
+  'intermediateCatchEvent', 'intermediateThrowEvent', 'boundaryEvent',
+  'exclusiveGateway', 'inclusiveGateway', 'parallelGateway', 'eventBasedGateway',
+  'sequenceFlow', 'subProcess', 'callActivity', 'textAnnotation', 'association', 'lane',
+]);
 
 export function buildMergedXml(
   baseXml: string,
   newXml: string,
   entries: DiffEntry[],
   selections: SelectionMap,
+  subSelections?: SubSelectionMap,
 ): string {
+  try {
   const parser = new DOMParser();
   const serializer = new XMLSerializer();
 
@@ -45,7 +55,7 @@ export function buildMergedXml(
   // Build a set of excluded element IDs (added elements user doesn't want)
   const excludedIds = new Set<string>();
   for (const entry of entries) {
-    const included = selections[entry.id] ?? true;
+    const included = selections[entry.id] ?? false;
     if (entry.status === 'added' && !included) {
       excludedIds.add(entry.id);
     }
@@ -66,6 +76,9 @@ export function buildMergedXml(
       }
     }
   }
+
+  // Collect child elements of excluded subProcesses recursively
+  collectSubProcessChildren(mergedDoc, excludedIds);
 
   // ── Pass 1: handle added-excluded elements ──
   for (const id of excludedIds) {
@@ -161,7 +174,6 @@ export function buildMergedXml(
   // ── Pass 4: fix incoming/outgoing child references on elements ──
   // BPMN elements have <incoming> and <outgoing> child elements that list flow IDs.
   // After removing/reverting flows, clean up stale references.
-  const removedFlowIds = new Set<string>();
   // Collect all flow IDs that still exist in merged
   const existingFlowIds = new Set<string>();
   const allMergedEls = mergedDoc.getElementsByTagName('*');
@@ -182,6 +194,19 @@ export function buildMergedXml(
       if (refId && !existingFlowIds.has(refId)) {
         el.parentNode?.removeChild(el);
       }
+    }
+  }
+
+  // ── Pass 4.5: clean gateway "default" attributes referencing removed flows ──
+  const gatewayTags = new Set(['exclusiveGateway', 'inclusiveGateway']);
+  const allGatewayEls = mergedDoc.getElementsByTagName('*');
+  for (let i = 0; i < allGatewayEls.length; i++) {
+    const el = allGatewayEls[i];
+    const ln = el.localName || el.nodeName.split(':').pop()!;
+    if (!gatewayTags.has(ln)) continue;
+    const defaultFlow = el.getAttribute('default');
+    if (defaultFlow && !existingFlowIds.has(defaultFlow)) {
+      el.removeAttribute('default');
     }
   }
 
@@ -214,8 +239,10 @@ export function buildMergedXml(
   }
 
   // ── Pass 6: handle other entry types (modified-excluded, removed-included) ──
+  // Also handle sub-selections for modified elements (partial attribute/child merge)
+  const REF_TAGS = new Set(['incoming', 'outgoing']);
   for (const entry of entries) {
-    const included = selections[entry.id] ?? true;
+    const included = selections[entry.id] ?? false;
 
     if (entry.status === 'modified' && !included) {
       // User chose BASE version — replace element content with BASE version
@@ -224,6 +251,69 @@ export function buildMergedXml(
       if (mergedEl && baseEl) {
         const imported = mergedDoc.importNode(baseEl, true);
         mergedEl.parentNode?.replaceChild(imported, mergedEl);
+      }
+    }
+
+    // Partial sub-selection merge for modified elements
+    if (entry.status === 'modified' && included && subSelections && entry.subChanges) {
+      const mergedEl = findProcessElement(mergedDoc, entry.id);
+      const baseEl = findProcessElement(baseDoc, entry.id);
+      if (mergedEl && baseEl) {
+        for (let si = 0; si < entry.subChanges.length; si++) {
+          const sc = entry.subChanges[si];
+          const key = sc.kind === 'attr'
+            ? `${entry.id}::attr::${sc.name}`
+            : `${entry.id}::child::${si}`;
+          const useNew = subSelections[key] ?? true;
+          if (useNew) continue; // merged doc already has NEW version
+
+          if (sc.kind === 'attr') {
+            // Revert this attribute to BASE value
+            if (sc.baseValue === null) {
+              mergedEl.removeAttribute(sc.name);
+            } else {
+              mergedEl.setAttribute(sc.name, sc.baseValue);
+            }
+          } else {
+            // Revert child element to BASE version
+            // Find the matching child in merged (NEW) and replace with BASE
+            const mergedChildren = Array.from(mergedEl.children);
+            const baseChildren = Array.from(baseEl.children);
+            for (const mc of mergedChildren) {
+              const tag = mc.localName || mc.nodeName.split(':').pop()!;
+              if (REF_TAGS.has(tag)) continue;
+              const mcKey = mc.getAttribute('id') || `${tag}`;
+              if (sc.kind === 'child' && sc.tag === tag) {
+                // Found matching child - check if it's the right one
+                const bcMatch = baseChildren.find(bc => {
+                  const btag = bc.localName || bc.nodeName.split(':').pop()!;
+                  if (btag !== tag) return false;
+                  const bkey = bc.getAttribute('id') || btag;
+                  return bkey === mcKey || btag === sc.tag;
+                });
+                if (bcMatch) {
+                  const imported = mergedDoc.importNode(bcMatch, true);
+                  mergedEl.replaceChild(imported, mc);
+                  break;
+                } else if (sc.baseSnippet === null) {
+                  // Child was added in NEW but sub-selection says use BASE (remove it)
+                  mergedEl.removeChild(mc);
+                  break;
+                }
+              }
+            }
+            // If child only exists in BASE and sub-selection says use BASE, add it
+            if (sc.baseSnippet !== null && sc.newSnippet === null) {
+              for (const bc of baseChildren) {
+                const btag = bc.localName || bc.nodeName.split(':').pop()!;
+                if (btag === sc.tag) {
+                  mergedEl.appendChild(mergedDoc.importNode(bc, true));
+                  break;
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -248,11 +338,199 @@ export function buildMergedXml(
     }
   }
 
+  // ── Pass 7: restore flows from BASE for gateways left with no outgoing/incoming ──
+  const allGatewayTagNames = ['exclusiveGateway', 'inclusiveGateway', 'parallelGateway', 'eventBasedGateway'];
+  const allElsForGwCheck = mergedDoc.getElementsByTagName('*');
+  for (let i = 0; i < allElsForGwCheck.length; i++) {
+    const el = allElsForGwCheck[i];
+    const ln = el.localName || el.nodeName.split(':').pop()!;
+    if (!allGatewayTagNames.includes(ln)) continue;
+
+    const gwId = el.getAttribute('id');
+    if (!gwId) continue;
+
+    // Count outgoing refs
+    let outgoingCount = 0;
+    let incomingCount = 0;
+    for (let c = 0; c < el.children.length; c++) {
+      const cln = el.children[c].localName || el.children[c].nodeName.split(':').pop()!;
+      if (cln === 'outgoing') outgoingCount++;
+      if (cln === 'incoming') incomingCount++;
+    }
+
+    const baseGw = findProcessElement(baseDoc, gwId);
+    if (!baseGw) continue;
+
+    // Restore missing outgoing flows from BASE
+    if (outgoingCount === 0) {
+      restoreFlowsFromBase('outgoing', baseGw, mergedDoc, baseDoc, findProcessElement, findDiElement, getPlane);
+    }
+
+    // Restore missing incoming flows from BASE
+    if (incomingCount === 0) {
+      restoreFlowsFromBase('incoming', baseGw, mergedDoc, baseDoc, findProcessElement, findDiElement, getPlane);
+    }
+  }
+
+  // ── Pass 8: clean up lane flowNodeRef entries pointing to removed elements ──
+  const allLaneEls = mergedDoc.getElementsByTagName('*');
+  // Collect all existing element IDs in merged doc
+  const allExistingIds = new Set<string>();
+  for (let i = 0; i < allLaneEls.length; i++) {
+    const eid = allLaneEls[i].getAttribute('id');
+    if (eid) allExistingIds.add(eid);
+  }
+  for (let i = allLaneEls.length - 1; i >= 0; i--) {
+    const el = allLaneEls[i];
+    const ln = el.localName || el.nodeName.split(':').pop()!;
+    if (ln === 'flowNodeRef') {
+      const refId = el.textContent?.trim();
+      if (refId && !allExistingIds.has(refId)) {
+        el.parentNode?.removeChild(el);
+      }
+    }
+  }
+
+  // ── Pass 9: clean up associations with broken sourceRef/targetRef ──
+  const allAssocEls = mergedDoc.getElementsByTagName('*');
+  const assocToRemove: Element[] = [];
+  for (let i = 0; i < allAssocEls.length; i++) {
+    const el = allAssocEls[i];
+    const ln = el.localName || el.nodeName.split(':').pop()!;
+    if (ln !== 'association') continue;
+
+    const sourceRef = el.getAttribute('sourceRef');
+    const targetRef = el.getAttribute('targetRef');
+
+    const srcExists = sourceRef ? findProcessElement(mergedDoc, sourceRef) !== null : true;
+    const tgtExists = targetRef ? findProcessElement(mergedDoc, targetRef) !== null : true;
+
+    if (!srcExists || !tgtExists) {
+      assocToRemove.push(el);
+    }
+  }
+  for (const assoc of assocToRemove) {
+    const assocId = assoc.getAttribute('id');
+    assoc.parentNode?.removeChild(assoc);
+    if (assocId) {
+      const di = findDiElement(mergedDoc, assocId);
+      if (di) di.parentNode?.removeChild(di);
+    }
+  }
+
   let xml = serializer.serializeToString(mergedDoc);
   if (!xml.startsWith('<?xml')) {
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml;
   }
   return xml;
+  } catch (err) {
+    throw new Error(
+      `BPMN merge failed: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+}
+
+function collectSubProcessChildren(doc: Document, excludedIds: Set<string>): void {
+  function collectChildren(parent: Element): void {
+    for (let i = 0; i < parent.children.length; i++) {
+      const child = parent.children[i];
+      const ln = child.localName || child.nodeName.split(':').pop()!;
+      if (SEMANTIC_TAGS.has(ln)) {
+        const childId = child.getAttribute('id');
+        if (childId) {
+          excludedIds.add(childId);
+        }
+      }
+      // Recurse into nested subProcesses
+      if (ln === 'subProcess') {
+        collectChildren(child);
+      }
+    }
+  }
+
+  for (const id of [...excludedIds]) {
+    const el = findProcessElementInDoc(doc, id);
+    if (!el) continue;
+    const ln = el.localName || el.nodeName.split(':').pop()!;
+    if (ln === 'subProcess') {
+      collectChildren(el);
+    }
+  }
+}
+
+function restoreFlowsFromBase(
+  direction: 'incoming' | 'outgoing',
+  baseGw: Element,
+  mergedDoc: Document,
+  baseDoc: Document,
+  findProcessElement: (doc: Document, id: string) => Element | null,
+  findDiElement: (doc: Document, elementId: string) => Element | null,
+  getPlane: (doc: Document) => Element | null,
+): void {
+  const bpmnModelNS = 'http://www.omg.org/spec/BPMN/20100524/MODEL';
+
+  for (let c = 0; c < baseGw.children.length; c++) {
+    const child = baseGw.children[c];
+    const cln = child.localName || child.nodeName.split(':').pop()!;
+    if (cln !== direction) continue;
+
+    const flowId = child.textContent?.trim();
+    if (!flowId) continue;
+
+    // Check if this flow already exists in merged doc
+    if (findProcessElement(mergedDoc, flowId)) continue;
+
+    // Restore the flow from BASE
+    const baseFlow = findProcessElement(baseDoc, flowId);
+    if (!baseFlow) continue;
+
+    // Also check target/source element exists or restore it
+    const refAttr = direction === 'outgoing' ? 'targetRef' : 'sourceRef';
+    const refId = baseFlow.getAttribute(refAttr);
+    if (refId && !findProcessElement(mergedDoc, refId)) {
+      // Restore the target/source element from BASE
+      const baseRefEl = findProcessElement(baseDoc, refId);
+      if (baseRefEl) {
+        const processes = mergedDoc.getElementsByTagNameNS(bpmnModelNS, 'process');
+        const process = processes.length > 0 ? processes[0] : mergedDoc.documentElement;
+        process.appendChild(mergedDoc.importNode(baseRefEl, true));
+
+        const baseDi = findDiElement(baseDoc, refId);
+        if (baseDi) {
+          const plane = getPlane(mergedDoc);
+          if (plane) plane.appendChild(mergedDoc.importNode(baseDi, true));
+        }
+      }
+    }
+
+    // Restore the flow itself
+    const processes = mergedDoc.getElementsByTagNameNS(bpmnModelNS, 'process');
+    const process = processes.length > 0 ? processes[0] : mergedDoc.documentElement;
+    process.appendChild(mergedDoc.importNode(baseFlow, true));
+
+    const baseDi = findDiElement(baseDoc, flowId);
+    if (baseDi) {
+      const plane = getPlane(mergedDoc);
+      if (plane) plane.appendChild(mergedDoc.importNode(baseDi, true));
+    }
+
+    // Also add the flow ref to the gateway in merged doc
+    const mergedGw = findProcessElement(mergedDoc, baseGw.getAttribute('id')!);
+    if (mergedGw && !hasFlowRef(mergedGw, direction, flowId)) {
+      addFlowRef(mergedDoc, mergedGw, direction, flowId);
+    }
+  }
+}
+
+function findProcessElementInDoc(doc: Document, id: string): Element | null {
+  const all = doc.getElementsByTagName('*');
+  for (let i = 0; i < all.length; i++) {
+    if (all[i].getAttribute('id') === id) {
+      const ns = all[i].namespaceURI || '';
+      if (!ns.includes('DI') && !ns.includes('DC')) return all[i];
+    }
+  }
+  return null;
 }
 
 function hasFlowRef(element: Element, type: 'incoming' | 'outgoing', flowId: string): boolean {

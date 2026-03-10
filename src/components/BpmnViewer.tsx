@@ -76,7 +76,7 @@ export default function BpmnViewer({ xml, entries, selections, side, onElementCl
       try {
         if (!elementRegistry.get(entry.id)) continue;
         if (side === 'new') {
-          const included = selections[entry.id] ?? true;
+          const included = selections[entry.id] ?? false;
           if (!included) canvas.addMarker(entry.id, 'dm-excluded');
           else if (entry.status === 'added') canvas.addMarker(entry.id, 'dm-added');
           else if (entry.status === 'modified') canvas.addMarker(entry.id, 'dm-modified');
