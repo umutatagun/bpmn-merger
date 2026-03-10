@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(\"/c/Program Files/nodejs/npx.cmd\":*)",
+      "Bash(cp:*)",
+      "Bash(npm install:*)",
+      "Bash(\"/c/Program Files/nodejs/npm.cmd\":*)",
+      "Bash(\"/c/Program Files/nodejs/npm.cmd\" install:*)",
+      "Bash(\"/c/Program Files/nodejs/npx.cmd\" vite:*)"
+    ]
+  }
+}
